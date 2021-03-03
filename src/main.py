@@ -150,7 +150,8 @@ if __name__ == "__main__":
                         help="Playing mode:\n\
     - 0: Piano plays automatically\n\
     - 1: Piano waits for you to press the correct key\n\
-    - 2: Piano waits for you to press and release the correct key")
+    - 2: Piano waits for you to press and release the correct key\n\
+    - 3: Piano doesn't wait for you")
     parser.add_argument("-f", "--file", dest="file", help="Midi file to play.")
     parser.add_argument("-s", "--speed", dest="speed", help="Speed of lecture",
                         default=1, type=int)
@@ -186,31 +187,31 @@ if __name__ == "__main__":
                     if msg.type == 'note_on' or msg.type == 'note_off':
                         strip.show()
 
+    if args.mode == "2":
+        with mido.open_input(MIDI_INPUT) as inport:
+            for msg in mid:
+                if not msg.is_meta:
+                    if msg.type == 'note_on' or msg.type == 'note_off':
+                        print("wait {}s".format(msg.time))
+                        time.sleep(msg.time * 2)
+                    # print(msg.type)
+                    if msg.type == 'note_on':
+                        key = msg.note - 21
+                        print("{}: ON".format(key))
+                        turn_on(key)
+                    elif msg.type == 'note_off':
+                        key = msg.note - 21
+                        print("{}: OFF".format(key))
+                        turn_off(key)
 
-    with mido.open_input(MIDI_INPUT) as inport:
-        for msg in mid:
-            if not msg.is_meta:
-                if msg.type == 'note_on' or msg.type == 'note_off':
-                    print("wait {}s".format(msg.time))
-                    time.sleep(msg.time * 2)
-                # print(msg.type)
-                if msg.type == 'note_on':
-                    key = msg.note - 21
-                    print("{}: ON".format(key))
-                    turn_on(key)
-                elif msg.type == 'note_off':
-                    key = msg.note - 21
-                    print("{}: OFF".format(key))
-                    turn_off(key)
-
-                if msg.type == 'note_on' or msg.type == 'note_off':
-                    strip.show()
-                    wrong_key = True
-                    while wrong_key is True:
-                        my_key = inport.receive()
-                        print("Press {}".format(msg.note))
-                        print("You pressed: {}".format(my_key))
-                        if my_key.note == msg.note:
-                            wrong_key = False
-                            print("Good key")
+                    if msg.type == 'note_on' or msg.type == 'note_off':
+                        strip.show()
+                        wrong_key = True
+                        while wrong_key is True:
+                            my_key = inport.receive()
+                            print("Press {}".format(msg.note))
+                            print("You pressed: {}".format(my_key))
+                            if my_key.note == msg.note:
+                                wrong_key = False
+                                print("Good key")
 
