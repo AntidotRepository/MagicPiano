@@ -1,3 +1,4 @@
+from argparse import ArgumentParser
 import mido
 import time
 import math
@@ -14,6 +15,8 @@ LED_DMA        = 10      # DMA channel to use for generating signal (try 10)
 LED_BRIGHTNESS = 10      # Set to 0 for darkest and 255 for brightest
 LED_INVERT     = False   # True to invert the signal (when using NPN transistor level shift)
 LED_CHANNEL    = 0       # set to '1' for GPIOs 13, 19, 41, 45 or 53
+
+MIDI_INPUT = 'Alesis Recital:Alesis Recital MIDI 1 20:0'
 
 keys = [
     {'start': 0, 'end': 3.0},        # 1
@@ -105,12 +108,7 @@ keys = [
     {'start': 170.0, 'end': 173.0},  # 87
     {'start': 173.0, 'end': 176.0}]  # 88
 
-mid = mido.MidiFile('song.mid')
-strip = Adafruit_NeoPixel(LED_COUNT, LED_PIN, LED_FREQ_HZ, LED_DMA, LED_INVERT, LED_BRIGHTNESS, LED_CHANNEL)
-# Intialize the library (must be called once before other functions).
-strip.begin()
-color_on = Color(50, 10, 10)
-color_off = Color(0, 0, 0)
+
 
 # 175 leds used
 # 1st midi note: 21
@@ -146,30 +144,73 @@ def turn_off(key):
         strip.setPixelColor(a_key, Color(0, 0, 0))
 
 
-with mido.open_input('Alesis Recital:Alesis Recital MIDI 1 20:0') as inport:
-    for msg in mid:
-        if not msg.is_meta:
-            if msg.type == 'note_on' or msg.type == 'note_off':
-                print("wait {}s".format(msg.time))
-                time.sleep(msg.time * 2)
-            # print(msg.type)
-            if msg.type == 'note_on':
-                key = msg.note - 21
-                print("{}: ON".format(key))
-                turn_on(key)
-            elif msg.type == 'note_off':
-                key = msg.note - 21
-                print("{}: OFF".format(key))
-                turn_off(key)
+if __name__ == "__main__":
+    parser = ArgumentParser()
+    parser.add_argument("-m", "--mode", dest="mode",
+                        help="Playing mode:\n\
+    - 0: Piano plays automatically\n\
+    - 1: Piano waits for you to press the correct key\n\
+    - 2: Piano waits for you to press and release the correct key")
+    parser.add_argument("-f", "--file", dest="file", help="Midi file to play.")
+    parser.add_argument("-s", "--speed", dest="speed", help="Speed of lecture",
+                        default=1, type=int)
+    args = parser.parse_args()
+    print(args.file)
 
-            if msg.type == 'note_on' or msg.type == 'note_off':
-                strip.show()
-                wrong_key = True
-                while wrong_key is True:
-                    my_key = inport.receive()
-                    print("Press {}".format(msg.note))
-                    print("You pressed: {}".format(my_key))
-                    if my_key.note == msg.note:
-                        wrong_key = False
-                        print("Good key")
+    mid = mido.MidiFile(args.file)
+    strip = Adafruit_NeoPixel(LED_COUNT, LED_PIN, LED_FREQ_HZ, LED_DMA,
+                              LED_INVERT, LED_BRIGHTNESS, LED_CHANNEL)
+    # Intialize the library (must be called once before other functions).
+    strip.begin()
+    color_on = Color(50, 10, 10)
+    color_off = Color(0, 0, 0)
+
+    if args.mode == "0":
+        with mido.open_output(MIDI_INPUT) as outport:
+            for msg in mid.play():
+                outport.send(msg)
+                if not msg.is_meta:
+                    # if msg.type == 'note_on' or msg.type == 'note_off':
+                    #     print("wait {}s".format(msg.time))
+                    #     time.sleep(msg.time * args.speed)
+                    # print(msg.type)
+                    if msg.type == 'note_on':
+                        key = msg.note - 21
+                        print("{}: ON".format(key))
+                        turn_on(key)
+                    elif msg.type == 'note_off':
+                        key = msg.note - 21
+                        print("{}: OFF".format(key))
+                        turn_off(key)
+
+                    if msg.type == 'note_on' or msg.type == 'note_off':
+                        strip.show()
+
+
+    with mido.open_input(MIDI_INPUT) as inport:
+        for msg in mid:
+            if not msg.is_meta:
+                if msg.type == 'note_on' or msg.type == 'note_off':
+                    print("wait {}s".format(msg.time))
+                    time.sleep(msg.time * 2)
+                # print(msg.type)
+                if msg.type == 'note_on':
+                    key = msg.note - 21
+                    print("{}: ON".format(key))
+                    turn_on(key)
+                elif msg.type == 'note_off':
+                    key = msg.note - 21
+                    print("{}: OFF".format(key))
+                    turn_off(key)
+
+                if msg.type == 'note_on' or msg.type == 'note_off':
+                    strip.show()
+                    wrong_key = True
+                    while wrong_key is True:
+                        my_key = inport.receive()
+                        print("Press {}".format(msg.note))
+                        print("You pressed: {}".format(my_key))
+                        if my_key.note == msg.note:
+                            wrong_key = False
+                            print("Good key")
 
