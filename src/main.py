@@ -1,4 +1,4 @@
-from mido import MidiFile
+import mido
 import time
 import math
 
@@ -105,22 +105,12 @@ keys = [
     {'start': 170.0, 'end': 173.0},  # 87
     {'start': 173.0, 'end': 176.0}]  # 88
 
-# black_keys = [3, 9, 13, 19, 23, 27, 33, 37, 43, 47, 51, 57, 61, 67, 71, 74,
-#               80, 84, 90, 94, 98, 104, 108, 114, 118, 122, 128, 132, 138, 142,
-#               145, 151, 155, 161, 165, 169]
-
-mid = MidiFile('song.mid')
+mid = mido.MidiFile('song.mid')
 strip = Adafruit_NeoPixel(LED_COUNT, LED_PIN, LED_FREQ_HZ, LED_DMA, LED_INVERT, LED_BRIGHTNESS, LED_CHANNEL)
 # Intialize the library (must be called once before other functions).
 strip.begin()
 color_on = Color(50, 10, 10)
 color_off = Color(0, 0, 0)
-# for i in range(strip.numPixels()):
-#     print("UILO")
-#     strip.setPixelColor(i, my_color)
-#     strip.show()
-
-
 
 # 175 leds used
 # 1st midi note: 21
@@ -131,79 +121,6 @@ MIDI_1 = 21
 MIDI_LAST = 108
 
 LEDS_PER_NOTE = MAX_PIANO_LEDS / (MIDI_LAST - MIDI_1)
-
-# for a_key in white_keys:
-#     if isinstance(a_key, dict):
-#         start = a_key["start"]
-#         end = a_key["end"]
-#         r = (1 - (start % 1) * 0.94) * 50
-#         strip.setPixelColor(math.floor(start), Color(round(r), 0, 0))
-
-#         r = (end % 1) * 0.94 * 50
-#         strip.setPixelColor(math.floor(end), Color(round(r), 0, 0))
-
-#         for j in range(math.ceil(start), math.floor(end)):
-#             strip.setPixelColor(j, Color(50, 0, 0))
-
-#     if isinstance(a_key, int):
-#         strip.setPixelColor(a_key, Color(0, 50, 0))
-
-#     strip.show()
-    # time.sleep(1)
-
-######################################
-# for msg in mid:
-#     if not msg.is_meta:
-#         if msg.type == 'note_on':
-#             a_key = white_keys[msg.note]
-#             print("{}: ON".format(msg.note))
-#             if isinstance(a_key, dict):
-#                 start = a_key["start"]
-#                 end = a_key["end"]
-#                 # r = (1 - (start % 1) * 0.94) * 50
-#                 # strip.setPixelColor(math.floor(start), Color(round(r), 0, 0))
-
-#                 # r = (end % 1) * 0.94 * 50
-#                 # strip.setPixelColor(math.floor(end), Color(round(r), 0, 0))
-
-#                 for j in range(math.ceil(start), math.floor(end)):
-#                     strip.setPixelColor(j - 21, Color(50, 0, 0))
-
-#             if isinstance(a_key, int):
-#                 strip.setPixelColor(a_key, Color(0, 50, 0))
-
-
-
-
-#             # for i in range(int(msg.note * LEDS_PER_NOTE), int((msg.note +1) * LEDS_PER_NOTE)):
-#             #     strip.setPixelColor(i, color_on)
-
-#         elif msg.type == 'note_off':
-#             print("{}: OFF".format(msg.note))
-#             a_key = white_keys[msg.note]
-#             if isinstance(a_key, dict):
-#                 start = a_key["start"]
-#                 end = a_key["end"]
-#                 # strip.setPixelColor(math.floor(start), Color(0, 0, 0))
-#                 # strip.setPixelColor(math.floor(end), Color(0, 0, 0))
-
-#                 for j in range(math.ceil(start), math.floor(end)):
-#                     strip.setPixelColor(j - 21, Color(0, 0, 0))
-
-#             if isinstance(a_key, int):
-#                 strip.setPixelColor(a_key, Color(0, 0, 0))
-
-#         if msg.type == 'note_on' or msg.type == 'note_off':
-#             strip.show()
-#             print("waiting {}s".format(msg.time))
-#             # input()
-#             time.sleep(msg.time)
-
-
-
-            # for i in range(int(msg.note * LEDS_PER_NOTE), int((msg.note +1) * LEDS_PER_NOTE)):
-            #     strip.setPixelColor(i, color_off)
-###############################
 
 
 def turn_on(key):
@@ -229,19 +146,30 @@ def turn_off(key):
         strip.setPixelColor(a_key, Color(0, 0, 0))
 
 
-for msg in mid:
-    if not msg.is_meta:
-        if msg.type == 'note_on' or msg.type == 'note_off':
-            strip.show()
-            print("wait {}s".format(msg.time))
-            time.sleep(msg.time * 2)
-        # print(msg.type)
-        if msg.type == 'note_on':
-            key = msg.note - 21
-            print("{}: ON".format(key))
-            turn_on(key)
-        elif msg.type == 'note_off':
-            key = msg.note - 21
-            print("{}: OFF".format(key))
-            turn_off(key)
+with mido.open_input('Alesis Recital:Alesis Recital MIDI 1 20:0') as inport:
+    for msg in mid:
+        if not msg.is_meta:
+            if msg.type == 'note_on' or msg.type == 'note_off':
+                print("wait {}s".format(msg.time))
+                time.sleep(msg.time * 2)
+            # print(msg.type)
+            if msg.type == 'note_on':
+                key = msg.note - 21
+                print("{}: ON".format(key))
+                turn_on(key)
+            elif msg.type == 'note_off':
+                key = msg.note - 21
+                print("{}: OFF".format(key))
+                turn_off(key)
+
+            if msg.type == 'note_on' or msg.type == 'note_off':
+                strip.show()
+                wrong_key = True
+                while wrong_key is True:
+                    my_key = inport.receive()
+                    print("Press {}".format(msg.note))
+                    print("You pressed: {}".format(my_key))
+                    if my_key.note == msg.note:
+                        wrong_key = False
+                        print("Good key")
 
