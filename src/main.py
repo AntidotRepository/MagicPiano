@@ -168,24 +168,33 @@ if __name__ == "__main__":
 
     if args.mode == "0":
         with mido.open_output(MIDI_INPUT) as outport:
-            for msg in mid.play():
-                outport.send(msg)
+            t0 = time.time()
+            for msg in mid:
                 if not msg.is_meta:
-                    # if msg.type == 'note_on' or msg.type == 'note_off':
-                    #     print("wait {}s".format(msg.time))
-                    #     time.sleep(msg.time * args.speed)
-                    # print(msg.type)
-                    if msg.type == 'note_on':
-                        key = msg.note - 21
-                        print("{}: ON".format(key))
-                        turn_on(key)
-                    elif msg.type == 'note_off':
-                        key = msg.note - 21
-                        print("{}: OFF".format(key))
-                        turn_off(key)
+                    t = msg.time - (time.time() - t0)
+                    t0 = time.time()
+                    print(msg.time)
+                    print(t)
+                    if t < 0:
+                        t = 0
+                    time.sleep(t / args.speed)
+                    outport.send(msg)
+                    if not msg.is_meta:
+                        # if msg.type == 'note_on' or msg.type == 'note_off':
+                        #     print("wait {}s".format(msg.time))
+                        #     time.sleep(msg.time * args.speed)
+                        # print(msg.type)
+                        if msg.type == 'note_on':
+                            key = msg.note - 21
+                            print("{}: ON".format(key))
+                            turn_on(key)
+                        elif msg.type == 'note_off':
+                            key = msg.note - 21
+                            print("{}: OFF".format(key))
+                            turn_off(key)
 
-                    if msg.type == 'note_on' or msg.type == 'note_off':
-                        strip.show()
+                        if msg.type == 'note_on' or msg.type == 'note_off':
+                            strip.show()
 
     if args.mode == "1":
         with mido.open_input(MIDI_INPUT) as inport:
@@ -249,7 +258,7 @@ if __name__ == "__main__":
                 if not msg.is_meta:
                     if msg.type == 'note_on' or msg.type == 'note_off':
                         print("wait {}s".format(msg.time))
-                        time.sleep(msg.time * args.speed)
+                        time.sleep(msg.time / args.speed)
                     # print(msg.type)
                     if msg.type == 'note_on':
                         key = msg.note - 21
