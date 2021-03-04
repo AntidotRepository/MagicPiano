@@ -197,33 +197,59 @@ if __name__ == "__main__":
                             strip.show()
 
     if args.mode == "1":
+        notes_to_press = list()
         with mido.open_input(MIDI_INPUT) as inport:
+            # for msg in mid:
+            #     if not msg.is_meta:
+            #         if msg.type == 'note_on' and msg.time < 0.01:
+            #             # On store la note mais on ne bloque pas
+            #             notes_to_press.append(msg.note)
+            #             key = msg.note - 21
+            #             print("{}: ON, time: {}".format(msg.note, msg.time))
+            #             turn_on(key)
+            #         elif msg.type == 'note_on' and msg.time > 0.01:
+            #             # On bloque, on attend les notes et ensuite on store
+            #             print(notes_to_press)
+            #             while len(notes_to_press) > 0:
+            #                 print("===============")
+            #                 my_key = inport.receive()
+            #                 print("You pressed: {}".format(my_key))
+            #                 if my_key.note in notes_to_press and my_key.velocity != 0:
+            #                     notes_to_press.remove(my_key.note)
+            #                     print("Good key: {}".format(my_key.note))
+            #             notes_to_press.append(msg.note)
+            #             key = msg.note - 21
+            #             print("after loop")
+            #             print("{}: ON, time: {}".format(msg.note, msg.time))
+            #             turn_on(key)
+            #         elif msg.type == 'note_off' and msg.time < 0.01:
+            #             key = msg.note - 21
+            #             print("{}: OFF, time: {}".format(msg.note, msg.time))
+            #             turn_off(key)
+
+            #         strip.show()
             for msg in mid:
                 if not msg.is_meta:
-                    if msg.type == 'note_on' or msg.type == 'note_off':
-                        print("wait {}s".format(msg.time))
-                        # time.sleep(msg.time * 2)
-                    # print(msg.type)
+                    if msg.time > 0.2:
+                        print("notes_to_press {}".format(msg.note))
+                        while len(notes_to_press) > 0:
+                            pressed = inport.receive()
+                            print("You pressed {}".format(pressed))
+                            if pressed.note in notes_to_press and pressed.velocity != 0:
+                                notes_to_press.remove(pressed.note)
+                                print("Removed {}".format(pressed.note))
+                                turn_off(pressed.note - 21)
+
                     if msg.type == 'note_on':
+                        notes_to_press.append(msg.note)
                         key = msg.note - 21
-                        print("{}: ON".format(key))
                         turn_on(key)
-                    elif msg.type == 'note_off':
+
+                    if msg.type == 'note_off':
                         key = msg.note - 21
-                        print("{}: OFF".format(key))
                         turn_off(key)
 
-                    if msg.type == 'note_on':
-                        strip.show()
-                        wrong_key = True
-                        while wrong_key is True:
-                            my_key = inport.receive()
-                            print("Press {}".format(msg.note))
-                            print("You pressed: {}".format(my_key))
-                            if my_key.note == msg.note:
-                                wrong_key = False
-                                print("Good key")
-
+                    strip.show()
     if args.mode == "2":
         with mido.open_input(MIDI_INPUT) as inport:
             for msg in mid:
