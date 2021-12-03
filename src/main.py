@@ -122,18 +122,23 @@ LEDS_PER_NOTE = MAX_PIANO_LEDS / (MIDI_LAST - MIDI_1)
 
 
 def turn_on(key):
+    """Turn on the lights for a key on the strip. Doesn't play it"""
     a_key = keys[key]
     if isinstance(a_key, dict):
+        # If a_key is a dict, it means that it's a white key.
         a_key = keys[key]
         start = a_key["start"]
         end = a_key["end"]
         for j in range(math.ceil(start), math.floor(end)):
+            # white keys can be several leds. So go through all of them.
             strip.setPixelColor(j, Color(50, 0, 0))
     else:
+        # If key is not a dict, it means that it's a black key
         strip.setPixelColor(a_key, Color(0, 50, 0))
 
 
 def turn_off(key):
+    """Turn off the lights for a key on the strip. Doesn't stop to play it."""
     a_key = keys[key]
     if isinstance(a_key, dict):
         start = a_key["start"]
