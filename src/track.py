@@ -13,15 +13,28 @@ class Track():
         self.my_tempo = tempo
         self.outport = outport
 
-        self.r = randrange(255)
-        self.g = randrange(255)
-        self.b = randrange(255)
+        if self.my_track.name == "Right":
+            self.r = 0
+            self.g = 255
+            self.b = 0
+        elif self.my_track.name == "Left":
+            self.r = 255
+            self.g = 0
+            self.b = 0
+        # self.r = randrange(255)
+        # self.g = randrange(255)
+        # self.b = randrange(255)
 
         print("New track: {}".format(self.my_track.name))
 
-    def play(self):
+    def play(self, t0):
         for a_msg in self.my_track:
-            print(self.my_track.name)
+            
+            # Timing management
+            t0 += mido.tick2second(a_msg.time, self.my_ticks_per_beat, self.my_tempo.get())
+            
+            if t0 > time.time():
+                time.sleep(t0 - time.time())
             if not a_msg.is_meta:
                 self.outport.send(a_msg)
             if a_msg.is_meta:
@@ -50,7 +63,13 @@ class Track():
                 # print("ticks_per_beat: {}".format(mid.ticks_per_beat))
                 # print("tempo: {}".format(tempo))
                 try:
-                    self.my_strip.my_keys[a_msg.note-21].light_on(self.r, self.g, self.b)
+                    # Some midi files use a "note_on" with velocity at 0 to say "note_off"
+                    if a_msg.velocity != 0:
+                        # If velocity is not 0, it's note on
+                        self.my_strip.my_keys[a_msg.note-21].light_on(self.r, self.g, self.b)
+                    else:
+                        # If velocity is 0, it's note off.
+                        self.my_strip.my_keys[a_msg.note-21].light_off(self.r, self.g, self.b)
                 except IndexError:
                     print("Index out of range: {}".format(a_msg.note))
                 # Example
@@ -70,7 +89,3 @@ class Track():
             else:
                 print("Unexpected type: {}".format(a_msg.type))
             self.my_strip.strip.show()
-            # print("{}: {}".format(self.my_track.name, self.my_tempo.get()))
-            time_to_sleep = mido.tick2second(a_msg.time, self.my_ticks_per_beat, self.my_tempo.get())
-            # print(time_to_sleep)
-            time.sleep(time_to_sleep)

@@ -47,9 +47,10 @@ if __name__ == "__main__":
         # Despite what the doc seems to say, time is in sec!
         # print(mid)
         threads = list()
+        t0 = time.time()
         for a_track in tracks:
             # Start a thread per track
-            a_thread = threading.Thread(target=a_track.play, daemon=True)
+            a_thread = threading.Thread(target=a_track.play, args=(t0,),daemon=True)
             a_thread.start()
             threads.append(a_thread)
 
