@@ -33,8 +33,9 @@ class Track():
             # Timing management
             t0 += mido.tick2second(a_msg.time, self.my_ticks_per_beat, self.my_tempo.get())
             
-            if t0 > time.time():
-                time.sleep(t0 - time.time())
+            to_sleep = t0 - time.time()
+            if to_sleep > 0:
+                time.sleep(to_sleep)
             if not a_msg.is_meta:
                 self.outport.send(a_msg)
             if a_msg.is_meta:
