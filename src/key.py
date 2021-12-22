@@ -27,10 +27,11 @@ class Key():
         else:
             self.my_leds[a_key] = 1
 
-    def light_on(self, r, g, b):
+    def light_on(self, a_color):
+        print("key: {}".format(type(a_color)))
         for led, brightness in self.my_leds.items():
-            self.my_strip_leds[led].add_brightness(brightness, r, g, b)
+            self.my_strip_leds[led].add_brightness(brightness, a_color)
 
-    def light_off(self, r, g, b):
+    def light_off(self, a_color):
         for led, brightness in self.my_leds.items():
-            self.my_strip_leds[led].rem_brightness(brightness, r, g, b)
+            self.my_strip_leds[led].rem_brightness(brightness, a_color)
