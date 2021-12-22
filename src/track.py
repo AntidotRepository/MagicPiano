@@ -74,21 +74,17 @@ class Track():
 
     def press_key(self, idx):
         idx -= 21
-        print("track: {}".format(type(self.color_w)))
-        self.my_strip.my_keys[idx].light_on(self.color_w)
-
-    def press_w_key(self):
-        pass
-
-    def press_b_key(self):
-        pass
+        a_key = self.my_strip.my_keys[idx]
+        if a_key.is_white:
+            a_key.light_on(self.color_w)
+        else:
+            a_key.light_on(self.color_b)
 
     def release_key(self, idx):
         idx -= 21
-        self.my_strip.my_keys[idx].light_off(self.color_w)
-
-    def release_w_key(self):
-        pass
-
-    def release_b_key(self):
-        pass
+        a_key = self.my_strip.my_keys[idx]
+        a_key.light_off(self.color_w)
+        if a_key.is_white:
+            a_key.light_off(self.color_w)
+        else:
+            a_key.light_off(self.color_b)

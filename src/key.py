@@ -6,8 +6,10 @@ class Key():
     def __init__(self, a_key, a_strip_leds):
         self.my_leds = dict()
         self.my_strip_leds = a_strip_leds
-
+        self.is_white = True
+        
         if isinstance(a_key, dict):
+            self.is_white = True
             start = math.floor(a_key["start"])
             end = math.floor(a_key["end"] - 1)
 
@@ -25,10 +27,10 @@ class Key():
             # Calculate last led as might be not fully bright
             self.my_leds[end + 1] = 1 - (a_key["end"] - 1 - end)
         else:
+            self.is_white = False
             self.my_leds[a_key] = 1
 
     def light_on(self, a_color):
-        print("key: {}".format(type(a_color)))
         for led, brightness in self.my_leds.items():
             self.my_strip_leds[led].add_brightness(brightness, a_color)
 

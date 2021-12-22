@@ -24,6 +24,12 @@ class Led:
         self.update()
 
     def update(self):
+        if self.my_Color.r < 0:
+            self.my_Color.r = 0
+        if self.my_Color.g < 0:
+            self.my_Color.g = 0
+        if self.my_Color.b < 0:
+            self.my_Color.b = 0
         r = self.my_Color.r
         g = self.my_Color.g
         b = self.my_Color.b
