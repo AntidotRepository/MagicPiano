@@ -6,15 +6,12 @@ from session import Session
 
 
 if __name__ == "__main__":
-
-
     parser = ArgumentParser()
     parser.add_argument("-m", "--mode", dest="mode",
                         help="Playing mode:\n\
     - 0: Piano plays automatically\n\
     - 1: Piano waits for you to press the correct key\n\
-    - 2: Piano waits for you to press and release the correct key\n\
-    - 3: Piano doesn't wait for you")
+    - 2: Free play mode")
     parser.add_argument("-f", "--file", dest="file", help="Midi file to play.")
     parser.add_argument("-s", "--speed", dest="speed", help="Speed of lecture",
                         default=1, type=float)
@@ -31,3 +28,6 @@ if __name__ == "__main__":
         mySession.play()
     elif args.mode == '1':
         mySession.train()
+    elif args.mode == '2':
+        mySession.free_play()
+        

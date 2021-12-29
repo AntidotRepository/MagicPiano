@@ -117,3 +117,18 @@ class Session():
                     self.release_key(msg)
 
                 self.my_strip.strip.show()
+
+    def free_play(self):
+        print("Free play!")
+        with mido.open_input(MIDI_INPUT) as inport:
+            while True:
+                pressed = inport.receive()
+                if pressed.type == 'note_on' and pressed.velocity != 0:
+                    a_key = self.my_strip.my_keys[pressed.note - 21]
+                    a_key.light_on(self.color_rb)
+
+                if pressed.type == 'note_off' or pressed.velocity == 0:
+                    a_key = self.my_strip.my_keys[pressed.note - 21]
+                    a_key.light_off(self.color_rb)
+
+                self.my_strip.strip.show()
