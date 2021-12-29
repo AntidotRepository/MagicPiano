@@ -27,4 +27,7 @@ if __name__ == "__main__":
     midi_file = mido.MidiFile(args.file)
 
     mySession = Session(midi_file)
-    mySession.play()
+    if args.mode == '0':
+        mySession.play()
+    elif args.mode == '1':
+        mySession.train()

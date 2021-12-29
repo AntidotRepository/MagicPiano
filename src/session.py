@@ -64,12 +64,13 @@ class Session():
                 a_key.light_off(self.color_lb)
 
     def play(self):
+        print("play")
         # Midi output
         with mido.open_output(MIDI_INPUT) as outport:
             t0 = time.time()
             my_ticks_per_beat = self.midi_file.ticks_per_beat
             my_tempo = 833333 # default tempo value
-            # for a_msg in msgs[2100:]:
+            #for i in range(670, len(self.msgs)):
             for i in range(0, len(self.msgs)):
                 a_msg = self.msgs[i]
                 if i == 0:
@@ -91,4 +92,28 @@ class Session():
                         self.release_key(a_msg)
                 elif a_msg.msg.type == "note_off":
                     self.release_key(a_msg)
+                self.my_strip.strip.show()
+
+    def train(self):
+        print("train")
+        to_play = list()
+
+        # Midi input
+        with mido.open_input(MIDI_INPUT) as inport:
+            # for a_msg in msgs[2100:]:
+            for i in range(0, len(self.msgs)):
+                msg = self.msgs[i]
+                if msg.msg.time > 7:
+                    while (len(to_play) != 0):
+                        pressed = inport.receive()
+                        if pressed.note in to_play and pressed.velocity != 0:
+                            to_play.remove(pressed.note)
+
+                if msg.msg.type == 'note_on':
+                    to_play.append(msg.msg.note)
+                    self.press_key(msg)
+
+                if msg.msg.type == 'note_off':
+                    self.release_key(msg)
+
                 self.my_strip.strip.show()
