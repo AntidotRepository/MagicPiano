@@ -9,11 +9,40 @@ from rpi_ws281x import *
 from observable import Observable
 from strip import Strip
 from message import Message
+from globales import mColor
 
 MIDI_INPUT = 'Alesis Recital:Alesis Recital MIDI 1 20:0'
 
 
 if __name__ == "__main__":
+    def press_key(msg):
+        msg.msg.note -= 21
+        a_key = my_strip.my_keys[msg.msg.note]
+        if a_key.is_white:
+            if msg.id_track == 0:
+                a_key.light_on(color_rw)
+            elif msg.id_track == 1:
+                a_key.light_on(color_lw)
+        else:
+            if msg.id_track == 0:
+                a_key.light_on(color_rb)
+            elif msg.id_track == 1:
+                a_key.light_on(color_lb)
+
+    def release_key(msg):
+        msg.msg.note -= 21
+        a_key = my_strip.my_keys[msg.msg.note]
+        if a_key.is_white:
+            if msg.id_track == 0:
+                a_key.light_off(color_rw)
+            elif msg.id_track == 1:
+                a_key.light_off(color_lw)
+        else:
+            if msg.id_track == 0:
+                a_key.light_off(color_rb)
+            elif msg.id_track == 1:
+                a_key.light_off(color_lb)
+
     parser = ArgumentParser()
     parser.add_argument("-m", "--mode", dest="mode",
                         help="Playing mode:\n\
@@ -38,6 +67,11 @@ if __name__ == "__main__":
     tempo = Observable(0)
 
     tracks = list()
+
+    color_rw = mColor(0, 255, 0)
+    color_rb = mColor(255, 0, 255)
+    color_lw = mColor(255, 0, 0)
+    color_lb = mColor(0, 255, 255)
 
     # Preprocessing step
         # Go through the midi file and put in a list each message
@@ -79,9 +113,19 @@ if __name__ == "__main__":
                 outport.send(a_msg.msg)
             if a_msg.msg.type == "set_tempo":
                 my_tempo = a_msg.msg.tempo
+            elif a_msg.msg.type == "note_on":
+                if a_msg.msg.velocity != 0:
+                    press_key(a_msg)
+                else:
+                    release_key(a_msg)
+            elif a_msg.msg.type == "note_off":
+                release_key(a_msg)
+            my_strip.strip.show()
 
 
-    # Midi output
+
+
+    # # Midi output
     # with mido.open_output(MIDI_INPUT) as outport:
     #     # Load the midi tracks from the midi file
     #     for a_track in midi_file.tracks:
