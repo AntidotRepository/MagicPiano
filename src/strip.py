@@ -3,6 +3,7 @@ from led import Led
 import time
 from key import Key
 import globales
+from globales import mColor
 
 # LED strip configuration:
 LED_COUNT      = 200      # Number of LED pixels.
@@ -36,4 +37,9 @@ class Strip:
         self.my_keys = list()
         # Create keys
         for a_key in globales.keys:
-            self.my_keys.append(Key(a_key, self.my_leds))
+            self.my_keys.append(Key(a_key, self))
+
+    def turn_off(self):
+        for a_led in self.my_leds:
+            a_led.set_brightness(0, mColor(0, 0, 0))
+        self.strip.show()

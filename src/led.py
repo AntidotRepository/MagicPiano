@@ -34,3 +34,9 @@ class Led:
         g = self.my_Color.g
         b = self.my_Color.b
         self.strip.setPixelColor(self.idx, Color(r, g, b))
+
+    def set_brightness(self, brightness, a_color):
+        self.my_Color.r = int(a_color.r * brightness)
+        self.my_Color.g = int(a_color.g * brightness)
+        self.my_Color.b = int(a_color.b * brightness)
+        self.update()
