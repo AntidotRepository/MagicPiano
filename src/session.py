@@ -103,15 +103,18 @@ class Session():
             # for a_msg in msgs[2100:]:
             for i in range(0, len(self.msgs)):
                 msg = self.msgs[i]
-                if msg.msg.time > 7:
+                if msg.msg.time > 20:
                     while (len(to_play) != 0):
                         pressed = inport.receive()
                         if pressed.note in to_play and pressed.velocity != 0:
                             to_play.remove(pressed.note)
 
                 if msg.msg.type == 'note_on':
-                    to_play.append(msg.msg.note)
-                    self.press_key(msg)
+                    if msg.msg.velocity != 0:
+                        to_play.append(msg.msg.note)
+                        self.press_key(msg)
+                    else:
+                        self.release_key(msg)
 
                 if msg.msg.type == 'note_off':
                     self.release_key(msg)
