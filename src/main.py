@@ -18,6 +18,8 @@ if __name__ == "__main__":
     parser.add_argument("-f", "--file", dest="file", help="Midi file to play.")
     parser.add_argument("-s", "--speed", dest="speed", help="Speed of lecture",
                         default=1, type=float)
+    parser.add_argument("-t", "--track", dest="track", help="Which hand to play.",
+                        default='b')
     args = parser.parse_args()
     print(args.file)
 
@@ -26,7 +28,7 @@ if __name__ == "__main__":
     # Contains our midi file
     midi_file = mido.MidiFile(args.file)
 
-    mySession = Session(midi_file)
+    mySession = Session(midi_file, args.track)
     if args.mode == '0':
         mySession.play()
     elif args.mode == '1':
