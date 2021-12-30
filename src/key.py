@@ -28,6 +28,8 @@ class Key():
             self.my_leds[self.end + 1] = 1 - (a_key["end"] - 1 - self.end)
         else:
             self.is_white = False
+            self.start = a_key    # Just for free mode
+            self.end = a_key      # Just for free mode
             self.my_leds[a_key] = 1
 
     def light_on(self, a_color):
@@ -43,10 +45,10 @@ class Key():
             self.my_strip_leds.my_leds[led].add_brightness(brightness, a_color)
         for i in range(1, 6):  # How many LEDs do we want to play with each side of the note
             self.my_strip_leds.my_leds[self.start - i].add_brightness(brightness - (i * 0.1), a_color)
-            self.my_strip_leds.my_leds[self.end + i + 1].add_brightness(brightness - (i * 0.1), a_color)
+            self.my_strip_leds.my_leds[self.end + i].add_brightness(brightness - (i * 0.1), a_color)
             self.my_strip_leds.strip.show()
             time.sleep(0.05)
             self.my_strip_leds.my_leds[self.start - i].rem_brightness(brightness - (i * 0.1), a_color)
-            self.my_strip_leds.my_leds[self.end + i + 1].rem_brightness(brightness - (i * 0.1), a_color)
+            self.my_strip_leds.my_leds[self.end + i].rem_brightness(brightness - (i * 0.1), a_color)
             self.my_strip_leds.strip.show()
             time.sleep(0.05)

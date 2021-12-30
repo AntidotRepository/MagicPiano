@@ -3,7 +3,7 @@ import mido
 import time
 from message import Message
 from strip import Strip
-
+import threading
 
 MIDI_INPUT = 'Alesis Recital:Alesis Recital MIDI 1 20:0'
 
@@ -122,6 +122,12 @@ class Session():
         print("Free play!")
         with mido.open_input(MIDI_INPUT) as inport:
             while True:
-                a_key = self.my_strip.my_keys[81 - 21]
-                a_key.free_light_on(self.color_rb)
+                pressed = inport.receive()
+                a_key = self.my_strip.my_keys[pressed.note - 21]
+                if pressed.type == 'note_on' and pressed.velocity != 0:
+                    a_thread = threading.Thread(target=a_key.free_light_on, args=(self.color_rb,),daemon=True)
+                    a_thread.start()
+                elif pressed.velocity == 0:
+                    a_key.light_off(self.color_rb)
+                    self.my_strip.strip.show()
 
