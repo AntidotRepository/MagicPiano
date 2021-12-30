@@ -8,7 +8,7 @@ import threading
 MIDI_INPUT = 'Alesis Recital:Alesis Recital MIDI 1 20:0'
 
 class Session():
-    def __init__(self, a_midi_file):
+    def __init__(self, a_midi_file, hand):
         self.midi_file = a_midi_file
         self.color_rw = mColor(0, 255, 0)
         self.color_rb = mColor(255, 0, 255)
@@ -23,12 +23,13 @@ class Session():
         id_track = 0
         time_track = 0
         for a_track in self.midi_file.tracks:
-            print(a_track.name)
-            for a_msg in a_track:
-                time_track += a_msg.time
-                self.msgs.append(Message(id_track, a_msg, time_track))
-            id_track += 1
-            time_track = 0  # Reset time for next rack
+            if (a_track.name == "Left" and (hand == 'b' or hand == 'l')) or\
+                (a_track.name == "Right" and (hand == 'b' or hand == 'r')):
+                for a_msg in a_track:
+                    time_track += a_msg.time
+                    self.msgs.append(Message(id_track, a_msg, time_track))
+                id_track += 1
+                time_track = 0  # Reset time for next rack
 
         self.msgs.sort(key=lambda x: x.time)
 
