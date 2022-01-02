@@ -70,7 +70,7 @@ class Session():
         with mido.open_output(MIDI_INPUT) as outport:
             t0 = time.time()
             my_ticks_per_beat = self.midi_file.ticks_per_beat
-            my_tempo = 833333 # default tempo value
+            my_tempo = 500000 # default tempo value
             #for i in range(670, len(self.msgs)):
             for i in range(0, len(self.msgs)):
                 a_msg = self.msgs[i]
