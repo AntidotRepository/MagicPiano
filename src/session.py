@@ -37,8 +37,8 @@ class Session():
 
 
     def press_key(self, msg):
-        msg.msg.note -= 21
-        a_key = self.my_strip.my_keys[msg.msg.note]
+        note = msg.msg.note - 21
+        a_key = self.my_strip.my_keys[note]
         if a_key.is_white:
             if msg.id_track == 0:
                 a_key.light_on(self.color_rw)
@@ -51,8 +51,8 @@ class Session():
                 a_key.light_on(self.color_lb)
 
     def release_key(self, msg):
-        msg.msg.note -= 21
-        a_key = self.my_strip.my_keys[msg.msg.note]
+        note = msg.msg.note - 21
+        a_key = self.my_strip.my_keys[note]
         if a_key.is_white:
             if msg.id_track == 0:
                 a_key.light_off(self.color_rw)
@@ -121,6 +121,40 @@ class Session():
                     self.release_key(msg)
 
                 self.my_strip.strip.show()
+
+    def death_mode(self):
+        print("Death mode!")
+        to_play = list()
+        with mido.open_input(MIDI_INPUT) as inport:
+            i = 0
+            while i < len(self.msgs):
+                msg = self.msgs[i]
+                print(i)
+                if msg.msg.time > 20:
+                    print("to_play: {}" .format(to_play))
+                    while (len(to_play) != 0):
+                        pressed = inport.receive()
+                        print("pressed: {}".format(pressed))
+                        if pressed.note in to_play and pressed.velocity != 0: 
+                            to_play.remove(pressed.note)
+                            print("Good!")
+                        elif pressed.note not in to_play and pressed.velocity != 0:
+                            self.press_key(msg)
+                            i = 0
+                            to_play = list()
+                            print("Bad!")
+                        self.my_strip.strip.show()
+                        print("show")
+
+                if msg.msg.type == 'note_on':
+                    if msg.msg.velocity != 0:
+                        print("append")
+                        to_play.append(msg.msg.note)
+
+                if msg.msg.type == 'note_off':
+                    print("release")
+                    self.release_key(msg)
+                i += 1
 
     def free_play(self):
         print("Free play!")
