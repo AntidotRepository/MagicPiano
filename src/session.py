@@ -129,30 +129,23 @@ class Session():
             i = 0
             while i < len(self.msgs):
                 msg = self.msgs[i]
-                print(i)
                 if msg.msg.time > 20:
                     print("to_play: {}" .format(to_play))
                     while (len(to_play) != 0):
                         pressed = inport.receive()
-                        print("pressed: {}".format(pressed))
                         if pressed.note in to_play and pressed.velocity != 0: 
                             to_play.remove(pressed.note)
-                            print("Good!")
                         elif pressed.note not in to_play and pressed.velocity != 0:
                             self.press_key(msg)
                             i = 0
                             to_play = list()
-                            print("Bad!")
                         self.my_strip.strip.show()
-                        print("show")
 
                 if msg.msg.type == 'note_on':
                     if msg.msg.velocity != 0:
-                        print("append")
                         to_play.append(msg.msg.note)
 
                 if msg.msg.type == 'note_off':
-                    print("release")
                     self.release_key(msg)
                 i += 1
 
